@@ -115,6 +115,8 @@ class SVGAndroidRenderer
 
    private static HashSet<String>  supportedFeatures = null;
 
+   private CSSParser.RuleMatchContext  ruleMatchContext = null;
+
 
    private class RendererState
    {
@@ -282,6 +284,10 @@ class SVGAndroidRenderer
 
       if (renderOptions.hasCss())
          document.addCSSRules(renderOptions.css);
+      if (renderOptions.hasTarget()) {
+         this.ruleMatchContext = new CSSParser.RuleMatchContext();
+         this.ruleMatchContext.targetElement = document.getElementById(renderOptions.targetId);
+      }
 
       // Initialise the state
       resetState();
@@ -432,7 +438,7 @@ class SVGAndroidRenderer
       {
          for (CSSParser.Rule rule: document.getCSSRules())
          {
-            if (CSSParser.ruleMatch(rule.selector, obj)) {
+            if (CSSParser.ruleMatch(this.ruleMatchContext, rule.selector, obj)) {
                updateStyle(state, rule.style);
             }
          }
@@ -3803,7 +3809,7 @@ class SVGAndroidRenderer
          path.setFillType(getClipRuleFromState());
       }
       else {
-         error("Invalid %s element found in clipPath definition", obj.getClass().getSimpleName());
+         error("Invalid %s element found in clipPath definition", obj.getNodeName());
          return null;
       }
 
@@ -3850,7 +3856,7 @@ class SVGAndroidRenderer
       boolean  userUnits = (clipPath.clipPathUnitsAreUser == null || clipPath.clipPathUnitsAreUser);
 
       if ((obj instanceof SVG.Group) && !userUnits) {
-         warn("<clipPath clipPathUnits=\"objectBoundingBox\"> is not supported when referenced from container elements (like %s)", obj.getClass().getSimpleName());
+         warn("<clipPath clipPathUnits=\"objectBoundingBox\"> is not supported when referenced from container elements (like %s)", obj.getNodeName());
          return;
       }
 
@@ -3906,7 +3912,7 @@ class SVGAndroidRenderer
       } else if (obj instanceof SVG.GraphicsElement) {
          addObjectToClip((SVG.GraphicsElement) obj, combinedPath, combinedPathMatrix);
       } else {
-         error("Invalid %s element found in clipPath definition", obj.getClass().getSimpleName());
+         error("Invalid %s element found in clipPath definition", obj.toString());
       }
 
       // Restore state

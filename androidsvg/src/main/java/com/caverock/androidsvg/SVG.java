@@ -46,7 +46,7 @@ import java.util.Set;
  * Typically, you will call one of the SVG loading and parsing classes then call the renderer,
  * passing it a canvas to draw upon.
  * 
- * <h4>Usage summary</h4>
+ * <h3>Usage summary</h3>
  * 
  * <ul>
  * <li>Use one of the static {@code getFromX()} methods to read and parse the SVG file.  They will
@@ -54,7 +54,7 @@ import java.util.Set;
  * <li>Call one of the {@code renderToX()} methods to render the document.
  * </ul>
  * 
- * <h4>Usage example</h4>
+ * <h3>Usage example</h3>
  * 
  * <pre>
  * {@code
@@ -75,9 +75,9 @@ import java.util.Set;
 
 public class SVG
 {
-   static final String  TAG = "AndroidSVG";
+   //static final String  TAG = "SVG";
 
-   private static final String  VERSION = "1.3.0-beta-1";
+   private static final String  VERSION = "1.3";
 
    private static final int     DEFAULT_PICTURE_WIDTH = 512;
    private static final int     DEFAULT_PICTURE_HEIGHT = 512;
@@ -188,6 +188,7 @@ public class SVG
     * @param resourceId the resource identifier of the SVG document.
     * @return an SVG instance on which you can call one of the render methods.
     * @throws SVGParseException if there is an error parsing the document.
+    * @since 1.2.1
     */
    @SuppressWarnings("WeakerAccess")
    public static SVG  getFromResource(Resources resources, int resourceId) throws SVGParseException
@@ -215,7 +216,7 @@ public class SVG
     * @throws SVGParseException if there is an error parsing the document.
     * @throws IOException if there is some IO error while reading the file.
     */
-   @SuppressWarnings("WeakerAccess")
+   @SuppressWarnings({"WeakerAccess", "unused"})
    public static SVG  getFromAsset(AssetManager assetManager, String filename) throws SVGParseException, IOException
    {
       SVGParser    parser = new SVGParser();
@@ -257,6 +258,7 @@ public class SVG
     * @param enable Set true if you want to enable entity expansion by the parser.
     * @since 1.3
     */
+   @SuppressWarnings("unused")
    public static void  setInternalEntitiesEnabled(boolean enable)
    {
       enableInternalEntities = enable;
@@ -266,6 +268,7 @@ public class SVG
     * @return true if internal entity expansion is enabled in the parser
     * @since 1.3
     */
+   @SuppressWarnings("unused")
    public static boolean  isInternalEntitiesEnabled()
    {
       return enableInternalEntities;
@@ -275,9 +278,17 @@ public class SVG
    /**
     * Register an {@link SVGExternalFileResolver} instance that the renderer should use when resolving
     * external references such as images, fonts, and CSS stylesheets.
+    *
+    * <p>
+    * <em>Note: prior to release 1.3, this was an instance method of (@code SVG}.  In 1.3, it was
+    * changed to a static method so that users can resolve external references to CSSS files while
+    * the SVG is being parsed.</em>
+    * </p>
     * 
     * @param fileResolver the resolver to use.
+    * @since 1.3
     */
+   @SuppressWarnings("unused")
    public static void  registerExternalFileResolver(SVGExternalFileResolver fileResolver)
    {
       externalFileResolver = fileResolver;
@@ -287,6 +298,7 @@ public class SVG
    /**
     * De-register the current {@link SVGExternalFileResolver} instance.
     */
+   @SuppressWarnings("unused")
    public static void  deregisterExternalFileResolver()
    {
       externalFileResolver = null;
@@ -359,6 +371,7 @@ public class SVG
     *
     * @param renderOptions options that describe how to render this SVG on the Canvas.
     * @return a Picture object suitable for later rendering using {@link Canvas#drawPicture(Picture)}
+    * @since 1.3
     */
    @SuppressWarnings({"WeakerAccess", "unused"})
    public Picture  renderToPicture(RenderOptions renderOptions)
@@ -409,6 +422,7 @@ public class SVG
     * @param heightInPixels the height of the {@code Picture}
     * @param renderOptions options that describe how to render this SVG on the Canvas.
     * @return a Picture object suitable for later rendering using {@link Canvas#drawPicture(Picture)}
+    * @since 1.3
     */
    @SuppressWarnings({"WeakerAccess", "unused"})
    public Picture  renderToPicture(int widthInPixels, int heightInPixels, RenderOptions renderOptions)
@@ -472,6 +486,7 @@ public class SVG
     * will be used as the viewport into which the document will be rendered.
     * 
     * @param canvas the canvas to which the document should be rendered.
+    * @since 1.3
     */
    @SuppressWarnings({"WeakerAccess", "unused"})
    public void  renderToCanvas(Canvas canvas)
@@ -508,6 +523,7 @@ public class SVG
     *
     * @param canvas the canvas to which the document should be rendered.
     * @param renderOptions options that describe how to render this SVG on the Canvas.
+    * @since 1.3
     */
    @SuppressWarnings({"WeakerAccess", "unused"})
    public void  renderToCanvas(Canvas canvas, RenderOptions renderOptions)
@@ -650,7 +666,7 @@ public class SVG
       if (this.rootElement == null)
          throw new IllegalArgumentException("SVG document is empty");
 
-      List<SvgObject>  viewElems = getElementsByTagName(View.class);
+      List<SvgObject>  viewElems = getElementsByTagName(View.NODE_NAME);
 
       Set<String>  viewIds = new HashSet<>(viewElems.size());
       for (SvgObject elem: viewElems)
@@ -1036,10 +1052,10 @@ public class SVG
          return new Box(minX, minY, maxX-minX, maxY-minY);
       }
 
-      static Box  fromRectF(RectF rect)
-      {
-         return Box.fromLimits(rect.left, rect.top, rect.right, rect.bottom);
-      }
+      //static Box  fromRectF(RectF rect)
+      //{
+      //   return Box.fromLimits(rect.left, rect.top, rect.right, rect.bottom);
+      //}
 
       RectF  toRectF()
       {
@@ -1110,7 +1126,7 @@ public class SVG
                                                           | SPECIFIED_VIEWPORT_FILL_OPACITY | SPECIFIED_VECTOR_EFFECT;
    */
 
-   protected static class  Style implements Cloneable
+   static class  Style implements Cloneable
    {
       // Which properties have been explicitly specified by this element
       long       specifiedFlags = 0;
@@ -1378,8 +1394,8 @@ public class SVG
 
    static class Length implements Cloneable
    {
-      float  value = 0;
-      Unit   unit = Unit.px;
+      float  value;
+      Unit   unit;
 
       Length(float value, Unit unit)
       {
@@ -1543,10 +1559,9 @@ public class SVG
       SVG           document;
       SvgContainer  parent;
 
-      public String  toString()
+      String  getNodeName()
       {
-         return this.getClass().getSimpleName();
-         //return super.toString();
+         return "";
       }
    }
 
@@ -1560,7 +1575,10 @@ public class SVG
       Style         style = null;       // style expressed in a 'style' attribute (eg. style="fill:black")
       List<String>  classNames = null;  // contents of the 'class' attribute
 
-      abstract String  getNodeName();
+      public String  toString()
+      {
+         return this.getNodeName();
+      }
    }
 
 
@@ -1628,7 +1646,7 @@ public class SVG
 
    static abstract class SvgConditionalContainer extends SvgElement implements SvgContainer, SvgConditional
    {
-      List<SvgObject> children = new ArrayList<>();
+      List<SvgObject>  children = new ArrayList<>();
 
       Set<String>  requiredFeatures = null;
       String       requiredExtensions = null;
@@ -1733,13 +1751,16 @@ public class SVG
    }
 
 
-   protected static class Use extends Group
+   static class Use extends Group
    {
       String  href;
       Length  x;
       Length  y;
       Length  width;
       Length  height;
+
+      @Override
+      String  getNodeName() { return "use"; }
    }
 
 
@@ -1853,7 +1874,7 @@ public class SVG
    }
 
 
-   protected static class Text extends TextPositionedContainer implements TextRoot, HasTransform
+   static class Text extends TextPositionedContainer implements TextRoot, HasTransform
    {
       Matrix  transform;
 
@@ -1890,7 +1911,7 @@ public class SVG
       
       public String  toString()
       {
-         return this.getClass().getSimpleName() + " '"+text+"'";
+         return "TextChild: '"+text+"'";
       }
 
       @Override
@@ -1934,6 +1955,8 @@ public class SVG
    // An SVG element that can contain other elements.
    static class Switch extends Group
    {
+      @Override
+      String  getNodeName() { return "switch"; }
    }
 
 
@@ -1988,12 +2011,12 @@ public class SVG
    {
       Float  offset;
 
-      // Dummy container methods. Stop is officially a container, but we 
+      // Dummy container methods. Stop is officially a container, but we
       // are not interested in any of its possible child elements.
       @Override
       public List<SvgObject> getChildren() { return Collections.emptyList(); }
       @Override
-      public void addChild(SvgObject elem) throws SVGParseException { /* do nothing */ }
+      public void addChild(SvgObject elem) { /* do nothing */ }
       @Override
       String  getNodeName() { return "stop"; }
    }
@@ -2049,7 +2072,7 @@ public class SVG
    }
 
 
-   protected static class Image extends SvgPreserveAspectRatioContainer implements HasTransform
+   static class Image extends SvgPreserveAspectRatioContainer implements HasTransform
    {
       String  href;
       Length  x;
@@ -2065,10 +2088,12 @@ public class SVG
    }
 
 
-   protected static class View extends SvgViewBoxContainer implements NotDirectlyRendered
+   static class View extends SvgViewBoxContainer implements NotDirectlyRendered
    {
+      static final String  NODE_NAME = "view";
+
       @Override
-      String  getNodeName() { return "view"; }
+      String  getNodeName() { return NODE_NAME; }
    }
 
 
@@ -2092,12 +2117,12 @@ public class SVG
       //public Length  solidColor;
       //public Length  solidOpacity;
 
-      // Dummy container methods. Stop is officially a container, but we 
+      // Dummy container methods. Stop is officially a container, but we
       // are not interested in any of its possible child elements.
       @Override
       public List<SvgObject> getChildren() { return Collections.emptyList(); }
       @Override
-      public void addChild(SvgObject elem) throws SVGParseException { /* do nothing */ }
+      public void addChild(SvgObject elem) { /* do nothing */ }
       @Override
       String  getNodeName() { return "solidColor"; }
    }
@@ -2142,9 +2167,9 @@ public class SVG
 
    static class PathDefinition implements PathInterface
    {
-      private byte[]   commands = null;
+      private byte[]   commands;
       private int      commandsLength = 0;
-      private float[]  coords = null;
+      private float[]  coords;
       private int      coordsLength = 0;
 
       private static final byte  MOVETO  = 0;
@@ -2291,7 +2316,7 @@ public class SVG
    }
 
 
-   SvgObject  getElementById(String id)
+   SvgElementBase  getElementById(String id)
    {
       if (id == null || id.length() == 0)
          return null;
@@ -2332,28 +2357,28 @@ public class SVG
 
 
    @SuppressWarnings("rawtypes")
-   private List<SvgObject>  getElementsByTagName(Class clazz)
+   private List<SvgObject>  getElementsByTagName(String nodeName)
    {
+      List<SvgObject>  result = new ArrayList<>();
+
        // Search the object tree for nodes with the give element class
-      return getElementsByTagName(rootElement, clazz);
+      getElementsByTagName(result, rootElement, nodeName);
+      return result;
    }
 
 
    @SuppressWarnings("rawtypes")
-   private List<SvgObject>  getElementsByTagName(SvgContainer obj, Class clazz)
+   private void  getElementsByTagName(List<SvgObject> result, SvgObject obj, String nodeName)
    {
-      List<SvgObject>  result = new ArrayList<>();
 
-      if (obj.getClass() == clazz)
-         result.add((SvgObject) obj);
-      for (SvgObject child: obj.getChildren())
+      if (obj.getNodeName().equals(nodeName))
+         result.add(obj);
+
+      if (obj instanceof SvgContainer)
       {
-         if (child.getClass() == clazz)
-            result.add(child);
-         if (child instanceof SvgContainer)
-            getElementsByTagName((SvgContainer) child, clazz);
+         for (SvgObject child: ((SvgContainer) obj).getChildren())
+            getElementsByTagName(result, child, nodeName);
       }
-      return result;
    }
 
 

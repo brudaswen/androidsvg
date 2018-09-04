@@ -20,8 +20,20 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 
 /**
- * Fluent builder class that provides a render configuration object for the
- * {@link SVG#renderToCanvas(Canvas,RenderOptions)} (Canvas,RenderOptions)} and {@link SVG#renderToPicture(int,int,RenderOptions)} methods.
+ * A fluent builder class that creates a render configuration object for the
+ * {@link SVG#renderToCanvas(Canvas,RenderOptions)} and {@link SVG#renderToPicture(int,int,RenderOptions)} methods.
+ *
+ * <h3>Example usage</h3>
+ *
+ * <pre class="code-block">
+ * {@code
+ * RenderOption renderOptions = RenderOptions.create();
+ * renderOptions.viewPort(100f, 100f, 400f, 300f)   // Set the area of the Canvas to render the SVG into
+ *              .css("rect { fill: red; }")         // Add some CSS that makes all rectangles red
+ * svg.renderToCanvas(canvas, renderOptions);
+ * }
+ * </pre>
+ * @since 1.3
  */
 
 public class RenderOptions
@@ -29,10 +41,16 @@ public class RenderOptions
    CSSParser.Ruleset    css = null;
    //String               id = null;
    PreserveAspectRatio  preserveAspectRatio = null;
+   String               targetId = null;
    SVG.Box              viewBox = null;
    String               viewId = null;
    SVG.Box              viewPort = null;
 
+
+   /**
+    * Create a new <code>RenderOptions</code> instance.  You can choose to use either this constructor,
+    * or <code>new RenderOptions.create()</code>.  Both are equivalent.
+    */
    public RenderOptions()
    {
    }
@@ -69,7 +87,7 @@ public class RenderOptions
     * Specifies some additional CSS rules that will be applied during render in addition to
     * any specified in the file itself.
     * @param css CSS rules to apply
-    * @return this RenderOptions instance
+    * @return this same <code>RenderOptions</code> instance
     */
    public RenderOptions  css(String css)
    {
@@ -80,44 +98,21 @@ public class RenderOptions
 
 
    /**
-    * Returns true if this RenderOptions instance has had CSS set with {@link #css(String)}.
+    * Returns true if this RenderOptions instance has had CSS set with {@code css()}.
+    * @return true if this RenderOptions instance has had CSS set
     */
    public boolean hasCss()
    {
-      return this.css != null;
+      return this.css != null && this.css.ruleCount() > 0;
    }
 
 
    /**
-    * Specifies that only the element with the matching {@code id} attribute, and its descendants,
-    * should be rendered.
-    * @param id {@code id} of the subtree to render
-    * @return this RenderOptions instance
-    */
-/*
-   public RenderOptions  id(String id)
-   {
-      this.id = id;
-      return this;
-   }
-*/
-
-
-   /**
-    * Returns true if this RenderOptions instance has had an id set with {@link #id(String)}.
-    */
-/*
-   public boolean hasId()
-   {
-      return this.id != null;
-   }
-*/
-
-
-   /**
-    *
-    * @param preserveAspectRatio
-    * @return
+    * Specifies how the renderer should handle aspect ratio when rendering the SVG.
+    * If not sepecified, the default will be <code>PreserveAspectRatio.LETTERBOX</code>. This is
+    * equivalent to the SVG default of <code>xMidYMid meet</code>.
+    * @param preserveAspectRatio the new aspect ration value
+    * @return this same <code>RenderOptions</code> instance
     */
    public RenderOptions  preserveAspectRatio(PreserveAspectRatio preserveAspectRatio)
    {
@@ -127,7 +122,8 @@ public class RenderOptions
 
 
    /**
-    * Returns true if this RenderOptions instance has had a preserveAspectRatio value set with {@link #preserveAspectRatio(PreserveAspectRatio)} .
+    * Returns true if this RenderOptions instance has had a preserveAspectRatio value set with {@code preserveAspectRatio()}.
+    * @return true if this RenderOptions instance has had a preserveAspectRatio value set
     */
    public boolean hasPreserveAspectRatio()
    {
@@ -143,7 +139,7 @@ public class RenderOptions
     * Note: setting this option will override any {@link #viewBox(float,float,float,float)} or {@link #preserveAspectRatio(PreserveAspectRatio)} settings.
     *
     * @param viewId the id attribute of the view that should be used for rendering
-    * @return this RenderOptions instance
+    * @return this same <code>RenderOptions</code> instance
     */
    public RenderOptions  view(String viewId)
    {
@@ -153,7 +149,8 @@ public class RenderOptions
 
 
    /**
-    * Returns true if this RenderOptions instance has had a view set with {@link #view(String)}.
+    * Returns true if this RenderOptions instance has had a view set with {@code view()}.
+    * @return true if this RenderOptions instance has had a view set
     */
    public boolean hasView()
    {
@@ -171,7 +168,7 @@ public class RenderOptions
     * @param minY The top Y coordinate of the viewBox
     * @param width The width of the viewBox
     * @param height The height of the viewBox
-    * @return this RenderOptions instance
+    * @return this same <code>RenderOptions</code> instance
     */
    public RenderOptions  viewBox(float minX, float minY, float width, float height)
    {
@@ -181,7 +178,8 @@ public class RenderOptions
 
 
    /**
-    * Returns true if this RenderOptions instance has had a viewBox set with {@link #viewBox(float,float,float,float)}.
+    * Returns true if this RenderOptions instance has had a viewBox set with {@code viewBox()}.
+    * @return true if this RenderOptions instance has had a viewBox set
     */
    public boolean hasViewBox()
    {
@@ -198,7 +196,7 @@ public class RenderOptions
     * @param minY The top Y coordinate of the viewport
     * @param width The width of the viewport
     * @param height The height of the viewport
-    * @return this RenderOptions instance
+    * @return this same <code>RenderOptions</code> instance
     */
    public RenderOptions  viewPort(float minX, float minY, float width, float height)
    {
@@ -208,11 +206,36 @@ public class RenderOptions
 
 
    /**
-    * Returns true if this RenderOptions instance has had a viewPort set with {@link #viewPort(float,float,float,float)}.
+    * Returns true if this RenderOptions instance has had a viewPort set with {@code viewPort()}.
+    * @return true if this RenderOptions instance has had a viewPort set
     */
    public boolean hasViewPort()
    {
       return this.viewPort != null;
+   }
+
+
+   /**
+    * Specifies the {@code id} of an element, in the SVG, to treat as the target element when
+    * using the {@code :target} CSS pseudo class.
+    *
+    * @param targetId the id attribute of an element
+    * @return this same <code>RenderOptions</code> instance
+    */
+   public RenderOptions  target(String targetId)
+   {
+      this.targetId = targetId;
+      return this;
+   }
+
+
+   /**
+    * Returns true if this RenderOptions instance has had a target set with {@code target()}.
+    * @return true if this RenderOptions instance has had a target set
+    */
+   public boolean hasTarget()
+   {
+      return this.targetId != null;
    }
 
 
